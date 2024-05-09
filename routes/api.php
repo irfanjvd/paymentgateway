@@ -24,3 +24,4 @@ Route::post('signup',[ApiController::class,'signup'])->name('signup');
 Route::post('login',[ApiController::class,'login'])->name('login');
 Route::middleware('auth:api')->post('change_password',[ApiController::class,'changePassword'])->name('change_password');
 Route::get('verify_email',[ApiController::class,'verifyEmail'])->name('verify_email');
+Route::post('forgot_password',[ApiController::class,'forgotPassword'])->name('forgot_password');

@@ -120,6 +120,36 @@ class ApiController extends Controller
         }
     }
 
+    function forgotPassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+        ]);
+        $user=User::where(['email' => $request->email])->first();
+
+        if($user){
+            $url=\App::make('url')->route('change_password');
+            $link="<a href='$url'>".$url."</a>";
+            $email_data=[
+                'to' => $request->email,
+                'subject' => 'Change Password',
+                'message' => "Click on below to change your password <br> $link<br> "
+            ];
+            
+            $this->sendEmail($email_data);
+            $data=[
+                'status' => true,
+                'message' => 'Change password request sent!!!',
+                'data' => ['user_id' => $user->id]
+            ]; 
+        }else{
+            $data=[
+                'status' => true,
+                'message' => 'User doesn`t exists!!!'
+            ];    
+        }
+        return response()->json($data,200);
+    }
+
     function verifyEmail(Request $request){
         User::find($request->id)->update(['email_verified_at' => now()]);
         $data=[
