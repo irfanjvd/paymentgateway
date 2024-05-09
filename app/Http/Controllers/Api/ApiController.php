@@ -132,7 +132,7 @@ class ApiController extends Controller
             $email_data=[
                 'to' => $request->email,
                 'subject' => 'Change Password',
-                'message' => "Click on below to change your password <br> $link<br> "
+                'message' => "Click on below to link to change your password <br> $link<br> "
             ];
             
             $this->sendEmail($email_data);
