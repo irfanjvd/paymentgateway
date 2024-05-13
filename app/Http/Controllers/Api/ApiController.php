@@ -40,6 +40,7 @@ class ApiController extends Controller
                 }
                 $success['token'] = $user->createToken('LaravelVueFirst_Token')->accessToken;
                 $success['user'] = [
+                    'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'mobile' => $user->mobile,
@@ -143,7 +144,7 @@ class ApiController extends Controller
             ]; 
         }else{
             $data=[
-                'status' => true,
+                'status' => false,
                 'message' => 'User doesn`t exists!!!'
             ];    
         }
