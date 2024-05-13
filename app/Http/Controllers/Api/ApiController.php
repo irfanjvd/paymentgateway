@@ -151,11 +151,20 @@ class ApiController extends Controller
     }
 
     function verifyEmail(Request $request){
-        User::find($request->id)->update(['email_verified_at' => now()]);
-        $data=[
-            'status' => true,
-            'message' => 'Email Verified Successfully!!!'
-        ];
+        $user=User::find($request->id);
+        if($user){
+            $user->update(['email_verified_at' => now()]);
+            $data=[
+                'status' => true,
+                'message' => 'Email Verified Successfully!!!'
+            ];
+        }else{
+            $data=[
+                'status' => true,
+                'message' => 'Invalid user!!!'
+            ];
+        }
+        
         return response()->json($data, 200);
     }
     
