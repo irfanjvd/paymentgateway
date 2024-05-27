@@ -64,7 +64,7 @@ class ApiController extends Controller
                 'status' => false,
                 'ResponseCode' => 201,
                 'message' => "Invalid Username Password"
-            ]);
+            ],200);
         }
 
     }
