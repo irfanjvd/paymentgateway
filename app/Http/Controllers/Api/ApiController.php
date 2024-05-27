@@ -78,7 +78,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 200);
         }else{
             $data=$request->all();
             $data['password']=Hash::make($data['password']);
