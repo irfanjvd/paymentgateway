@@ -13,6 +13,15 @@ use App\Models\User;
 use App\Http\Requests\SignupRequest;
 use App\Mail\SendHtmlEmail;
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+
+
+
+
+
+
 class ApiController extends Controller
 {
     /**
@@ -87,7 +96,8 @@ class ApiController extends Controller
                 'status'  =>  true,
                 'message'   => 'User Signup Successfully!!!',
             ];
-            $url=\App::make('url')->route('verify_email',['id' => $user->id]);
+            //$url=\App::make('url')->route('verify_email',['id' => $user->id]);
+ 	        $url=env('APP_LINK').$user->id;
             $link="<a href='$url'>".$url."</a>";
             $email_data=[
                 'to' => $request->email,
@@ -170,23 +180,33 @@ class ApiController extends Controller
     }
     
     function sendEmail($data){
-            $to = $data['to'];
-            $subject = $data['subject'];
-            $from = 'info@cargoflyers.com';
-            // To send HTML mail, the Content-type header must be set
-            $headers  = 'MIME-Version: 1.0' . "\r\n";
-            $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-             
-            // Create email headers
-            $headers .= 'From: '.$from."\r\n".
-                'Reply-To: '.$from."\r\n" .
-                'X-Mailer: PHP/' . phpversion();
-             
-            // Compose a simple HTML email message
-            $message = $data['message'];
-             
-            // Sending email
-            mail($to, $subject, $message, $headers);
+        $mail = new PHPMailer(true);
+
+        try {
+            //Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com'; // Set the SMTP server to send through
+            $mail->SMTPAuth = true;
+            $mail->Username = env('MAIL_USERNAME'); // SMTP username
+            $mail->Password = env('MAIL_PASSWORD'); // SMTP password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            //Recipients
+            $mail->setFrom('info@cargoflyers.com', 'Cargo Flyers');
+            $mail->addAddress($data['to']);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = $data['subject'];
+            $mail->Body    = $data['message'];
+
+            $mail->send();
+            // echo 'Email has been sent';
+        } catch (Exception $e) {
+            // echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            // error_log("Mailer Error: {$mail->ErrorInfo}");
+        }
         
         
     }
@@ -208,4 +228,36 @@ class ApiController extends Controller
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
+
+    
+    public function testmail(){
+        $mail = new PHPMailer(true);
+
+try {
+    //Server settings
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com'; // Set the SMTP server to send through
+    $mail->SMTPAuth = true;
+    $mail->Username = ''; // SMTP username
+    $mail->Password = ''; // SMTP password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+
+    //Recipients
+    $mail->setFrom('info@cargoflyers.com', 'Cargo Flyers');
+    $mail->addAddress("irfanjvd@gmail.com");
+
+    // Content
+    $mail->isHTML(true);
+    $mail->Subject = "test subject";
+    $mail->Body    = "test message";
+
+    $mail->send();
+    echo 'Email has been sent';
+} catch (Exception $e) {
+    echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    error_log("Mailer Error: {$mail->ErrorInfo}");
+}
+        }
+
 }
