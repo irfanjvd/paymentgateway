@@ -98,33 +98,33 @@ class ApiController extends Controller
             return response()->json($data, 200);
         }else{
             $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users|max:255',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users|max:255',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 200);
-        }else{
-            $data=$request->all();
-            $data['password']=Hash::make($data['password']);
-            $user=User::create($data);
-            $data=[
-                'status'  =>  true,
-                'message'   => 'User Signup Successfully!!!',
-            ];
-            //$url=\App::make('url')->route('verify_email',['id' => $user->id]);
-            $url=env('APP_LINK').$user->id;
-            $link="<a href='$url'>".$url."</a>";
-            $email_data=[
-                'to' => $request->email,
-                'subject' => 'Verify Email',
-                'message' => "Verify Your Email <br> $link<br> Your code will expire in 10 minutes.<br><br> If you didn`t request this code, it was likely sent by mistake and you may ignore this."
-            ];
-            //$this->sendEmailGeneric($email_data);
-            $this->sendEmail($email_data);
-            return response()->json($data, 200);
-        }    
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'errors' => $validator->errors()], 200);
+            }else{
+                $data=$request->all();
+                $data['password']=Hash::make($data['password']);
+                $user=User::create($data);
+                $data=[
+                    'status'  =>  true,
+                    'message'   => 'User Signup Successfully!!!',
+                ];
+                //$url=\App::make('url')->route('verify_email',['id' => $user->id]);
+                $url=env('APP_LINK').$user->id;
+                $link="<a href='$url'>".$url."</a>";
+                $email_data=[
+                    'to' => $request->email,
+                    'subject' => 'Verify Email',
+                    'message' => "Verify Your Email <br> $link<br> Your code will expire in 10 minutes.<br><br> If you didn`t request this code, it was likely sent by mistake and you may ignore this."
+                ];
+                //$this->sendEmailGeneric($email_data);
+                $this->sendEmail($email_data);
+                return response()->json($data, 200);
+            }    
         }
         
         
@@ -142,6 +142,25 @@ class ApiController extends Controller
             $data=$request->all();
             $data_save['password']=Hash::make($data['password']);
             User::find(Auth::user()->id)->update($data_save);
+            $data=[
+                'status'  =>  true,
+                'message'   => 'Password Changed Successfully!!!',
+            ];
+            return response()->json($data, 200);
+        }
+    }
+
+    public function resetPassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }else{
+            $data=$request->all();
+            $data_save['password']=Hash::make($data['password']);
+            User::where(['email' => $request->email])->update($data_save);
             $data=[
                 'status'  =>  true,
                 'message'   => 'Password Changed Successfully!!!',
