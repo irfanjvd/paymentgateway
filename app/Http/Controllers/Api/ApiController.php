@@ -18,10 +18,6 @@ use PHPMailer\PHPMailer\Exception;
 
 
 
-
-
-
-
 class ApiController extends Controller
 {
     /**
@@ -146,6 +142,14 @@ class ApiController extends Controller
                 'status'  =>  true,
                 'message'   => 'Password Changed Successfully!!!',
             ];
+            //$url=\App::make('url')->route('verify_email',['id' => $user->id]);
+ 	        $url=env('APP_VERIFY_LINK');
+            $link="<a href='$url'>".$url."</a>";
+            $email_data=[
+                'to' => $request->email,
+                'subject' => 'Verify Email',
+                'message' => "Verify Your Email <br> $link<br> Your code will expire in 10 minutes.<br><br> If you didn`t request this code, it was likely sent by mistake and you may ignore this."
+            ];
             return response()->json($data, 200);
         }
     }
@@ -176,7 +180,8 @@ class ApiController extends Controller
         $user=User::where(['email' => $request->email])->first();
 
         if($user){
-            $url=\App::make('url')->route('change_password');
+            // $url=\App::make('url')->route('change_password');
+            $url=env('APP_CHANGE_PASS_LINK').$user->id;
             $link="<a href='$url'>".$url."</a>";
             $email_data=[
                 'to' => $request->email,
@@ -231,7 +236,7 @@ class ApiController extends Controller
             $mail->Port = 587;
 
             //Recipients
-            $mail->setFrom('info@cargoflyers.com', 'Cargo Flyers');
+            $mail->setFrom('info@chatwithmodules.com', 'Chat With Moduels');
             $mail->addAddress($data['to']);
 
             // Content
