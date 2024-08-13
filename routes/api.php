@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\ApiController;
 Route::post('signup',[ApiController::class,'signup'])->name('signup');
 Route::post('login',[ApiController::class,'login'])->name('login');
 Route::middleware('auth:api')->post('change_password',[ApiController::class,'changePassword'])->name('change_password');
+Route::any('get_subscriptions',[ApiController::class,'getSubscriptions'])->name('get_subscriptions');
+Route::middleware('auth:api')->any('get_user_subscription',[ApiController::class,'getUserSubscription'])->name('get_user_subscription');
 Route::post('reset_password',[ApiController::class,'resetPassword'])->name('reset_password');
 Route::post('verify_email',[ApiController::class,'verifyEmail'])->name('verify_email');
 Route::post('forgot_password',[ApiController::class,'forgotPassword'])->name('forgot_password');

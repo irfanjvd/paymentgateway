@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 
 use App\Models\User;
+use App\Models\Packages;
+use App\Models\UserPackages;
 use App\Http\Requests\SignupRequest;
 use App\Mail\SendHtmlEmail;
 
@@ -220,6 +222,17 @@ class ApiController extends Controller
         }
         
         return response()->json($data, 200);
+    }
+
+    public function getSubscriptions(Request $request){
+        $packages=Packages::where(['status'=>1])->get();
+        return response()->json($packages, 200);
+    }
+
+    public function getUserSubscription(Request $request){
+        $user_id = Auth::id();
+        $user_packages=UserPackages::where(['user_id'=>$user_id,'status'=>1])->get();
+        return response()->json($user_packages, 200);
     }
     
     function sendEmail($data){
