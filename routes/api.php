@@ -25,6 +25,8 @@ Route::post('login',[ApiController::class,'login'])->name('login');
 Route::middleware('auth:api')->post('change_password',[ApiController::class,'changePassword'])->name('change_password');
 Route::middleware('auth:api')->any('get_subscriptions',[ApiController::class,'getSubscriptions'])->name('get_subscriptions');
 Route::middleware('auth:api')->any('get_checkout_session',[ApiController::class,'getCheckoutSession'])->name('get_checkout_session');
+Route::middleware('auth:api')->any('check_user_have_subscription',[ApiController::class,'checkUserHaveSubscription'])->name('check_user_have_subscription');
+
 
 Route::middleware('auth:api')->any('get_user_subscription',[ApiController::class,'getUserSubscription'])->name('get_user_subscription');
 Route::post('reset_password',[ApiController::class,'resetPassword'])->name('reset_password');

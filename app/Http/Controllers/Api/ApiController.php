@@ -19,6 +19,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Stripe\Subscription;
 
 
 
@@ -235,7 +236,7 @@ class ApiController extends Controller
                 $package_data[]=[
                     'type' => $val->type,
                     'description' => $val->description,
-                    'link' => $val->link."?client_reference_id=".base64url_encode($user_id)."&p_id=".base64url_encode($val->id)
+                    'link' => $val->link."?client_reference_id=".base64url_encode($user_id."_".$val->id)
                 ];
             }
         }
@@ -265,8 +266,51 @@ class ApiController extends Controller
             // Handle the error appropriately
             return response()->json(['error' => $e->getMessage()], 400);
         }
-
+        $user_sub_arr=explode("_",base64url_decode($checkoutSession->client_reference_id));
+        $user_id=$user_sub_arr[0];
+        $package_id=$user_sub_arr[1];
+        $customer_id=$checkoutSession->customer;
+        User::find($user_id)->update(['stripe_customer_id'=>$customer_id]);
+        // $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id]);
+        // return $this->getUserSubscription($request);
         return response()->json($checkoutSession);
+    }
+
+    public function checkUserHaveSubscription(Request $request)
+    {
+        $user = auth()->user(); // Assuming you're using Laravel's authentication system
+        $stripeCustomerId = $user->stripe_customer_id;
+
+        if (!$stripeCustomerId) {
+            return response()->json(['status'=>false,'has_subscription' => false]);
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $subscriptions = Subscription::all([
+                'customer' => $stripeCustomerId,
+                'status' => 'active',
+                'limit' => 1,
+            ]);
+            if ($subscriptions->data) {
+                $sub_data=[
+                    'has_subscription' => true,
+                    'type' => $subscriptions->data[0]->items->data[0]->plan->interval,
+                    'start_date' => date('Y-m-d',$subscriptions->data[0]->current_period_start),
+                    'end_date' => date('Y-m-d',$subscriptions->data[0]->current_period_end)
+                ];
+                // return response()->json([
+                //     'has_subscription' => true,
+                //     'subscription' => $subscriptions->data[0]
+                // ]);
+                return response()->json($sub_data);
+            } else {
+                return response()->json(['has_subscription' => false]);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status'=>false,'error' => $e->getMessage()], 400);
+        }
     }
     
     function sendEmail($data){

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'mobile',
         'password',
+        'stripe_customer_id',
         'email_verified_at'
     ];
 
