@@ -17,6 +17,8 @@ use App\Mail\SendHtmlEmail;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
 
 
 
@@ -225,14 +227,46 @@ class ApiController extends Controller
     }
 
     public function getSubscriptions(Request $request){
+        $user_id = Auth::id();
         $packages=Packages::where(['status'=>1])->get();
-        return response()->json($packages, 200);
+        $package_data=[];
+        if(!empty($packages)){
+            foreach($packages as $key=>$val){
+                $package_data[]=[
+                    'type' => $val->type,
+                    'description' => $val->description,
+                    'link' => $val->link."?client_reference_id=".base64url_encode($user_id)."&p_id=".base64url_encode($val->id)
+                ];
+            }
+        }
+        return response()->json($package_data, 200);
     }
 
     public function getUserSubscription(Request $request){
         $user_id = Auth::id();
         $user_packages=UserPackages::where(['user_id'=>$user_id,'status'=>1])->get();
         return response()->json($user_packages, 200);
+    }
+
+    public function getCheckoutSession(Request $request){
+        // Set your secret key. Remember to switch to your live secret key in production!
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        // Retrieve the session by ID
+        $sessionId = $request->checkout_session_id; // Replace with your actual session ID
+        try {
+            $checkoutSession = Session::retrieve($sessionId);
+            // You can access details like:
+            $customerEmail = $checkoutSession->customer_email;
+            $amountTotal = $checkoutSession->amount_total;
+            $paymentStatus = $checkoutSession->payment_status;
+            // Add more fields as needed
+        } catch (\Exception $e) {
+            // Handle the error appropriately
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+
+        return response()->json($checkoutSession);
     }
     
     function sendEmail($data){
