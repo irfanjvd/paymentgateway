@@ -244,7 +244,7 @@ class ApiController extends Controller
     }
 
     public function getUserSubscription(Request $request){
-        $user_id = Auth::id();
+        
         $user_packages=UserPackages::where(['user_id'=>$user_id,'status'=>1])->get();
         return response()->json($user_packages, 200);
     }
@@ -267,11 +267,11 @@ class ApiController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
         $user_sub_arr=explode("_",base64url_decode($checkoutSession->client_reference_id));
-        $user_id=$user_sub_arr[0];
         $package_id=$user_sub_arr[1];
         $customer_id=$checkoutSession->customer;
+        $user_id = Auth::id();
         User::find($user_id)->update(['stripe_customer_id'=>$customer_id]);
-        // $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id]);
+        $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id]);
         // return $this->getUserSubscription($request);
         return response()->json($checkoutSession);
     }
