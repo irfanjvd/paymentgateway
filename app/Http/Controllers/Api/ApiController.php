@@ -273,7 +273,7 @@ class ApiController extends Controller
 
         $user_id = Auth::id();
         // User::find($user_id)->update(['stripe_customer_id'=>$customer_id]);
-        $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id,'subscription_id' => $subscription_id,'stripe_customer_id'=>$stripe_customer_id]);
+        $record=UserPackages::firstOrCreate(['user_id'=>$user_id,'package_id'=>$package_id,'subscription_id' => $subscription_id,'stripe_customer_id'=>$customer_id],['user_id'=>$user_id,'package_id'=>$package_id,'subscription_id' => $subscription_id,'stripe_customer_id'=>$customer_id]);
         // return $this->getUserSubscription($request);
         return response()->json($checkoutSession);
     }
