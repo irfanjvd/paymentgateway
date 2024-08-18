@@ -20,7 +20,7 @@ class UserPackages extends Authenticatable
      */
     protected $table = 'user_packages';
     protected $fillable = [
-        'package_id','user_id','start_date','end_date','status'
+        'package_id','user_id','subscription_id','stripe_customer_id','start_date','end_date','status'
     ];
 
     /**

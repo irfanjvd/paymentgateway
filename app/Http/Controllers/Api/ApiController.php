@@ -269,9 +269,11 @@ class ApiController extends Controller
         $user_sub_arr=explode("_",base64url_decode($checkoutSession->client_reference_id));
         $package_id=$user_sub_arr[1];
         $customer_id=$checkoutSession->customer;
+        $subscription_id=$checkoutSession->subscription;
+
         $user_id = Auth::id();
-        User::find($user_id)->update(['stripe_customer_id'=>$customer_id]);
-        $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id]);
+        // User::find($user_id)->update(['stripe_customer_id'=>$customer_id]);
+        $record=UserPackages::create(['user_id'=>$user_id,'package_id'=>$package_id,'subscription_id' => $subscription_id,'stripe_customer_id'=>$stripe_customer_id]);
         // return $this->getUserSubscription($request);
         return response()->json($checkoutSession);
     }
@@ -311,6 +313,14 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status'=>false,'error' => $e->getMessage()], 400);
         }
+    }
+
+    public function cancelSubscription(Request $request){
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+        $subscription = \Stripe\Subscription::update("sub_1PoTw52NZ1xVuGdUeVfkv3a6", [
+            'cancel_at_period_end' => true,
+        ]);
+        
     }
     
     function sendEmail($data){
